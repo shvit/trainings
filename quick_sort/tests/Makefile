@@ -1,7 +1,5 @@
 APP := test
 
-EXT_DEPENDS := ../VectorQSort.o
-
 CFLAGS += -Wall -pedantic -fPIC -std=c++17 -MMD
 LDFLAGS += -lstdc++
 
@@ -16,7 +14,7 @@ all: $(APP)
 	@echo "Compiling $@"
 	@$(CXX) -c $(CFLAGS) $< -o $@
 
-$(APP): $(OBJ_APP) $(EXT_DEPENDS)
+$(APP): $(OBJ_APP)
 	@echo "Linking $@"
 	@$(CXX) $^ -o $@ -lboost_unit_test_framework $(LDFLAGS) 
 

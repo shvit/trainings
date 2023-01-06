@@ -6,7 +6,7 @@
 
 int main(int argc, char *argv[])
 {
-    VectorQSort arr;
+    VectorQSort<int> arr;
     if(argc > 1)
     {
         std::stringstream ss;
