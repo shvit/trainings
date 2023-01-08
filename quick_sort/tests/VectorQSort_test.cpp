@@ -1,12 +1,14 @@
 #include <boost/test/unit_test.hpp>
 #include <iostream>
+#include <iomanip>
 
 #include "test.hpp"
 #include "../VectorQSort.hpp"
 
 BOOST_AUTO_TEST_SUITE(Common)
 
-class test_VectorQSort: public VectorQSort
+template<typename T>
+class test_VectorQSort: public VectorQSort<T>
 {
 public:
     size_t iteration{0U};
@@ -14,14 +16,15 @@ public:
     {
         if(left > right) throw std::runtime_error("Failed left-right borders");
         if(left == right) return left;
-        if((left == 0U) && (right == (size()-1U)))
+        if((left == 0U) && (right == (std::vector<T>::size()-1U)))
         {
             return iteration;
         }
         return left + (std::rand() % (right-left+1));
     }
 
-    using VectorQSort::VectorQSort;
+    using VectorQSort<T>::VectorQSort;
+    using VectorQSort<T>::eqv;
 };
 
 BOOST_AUTO_TEST_CASE(SortedVectors)
@@ -33,7 +36,7 @@ BOOST_AUTO_TEST_CASE(SortedVectors)
 
     #define CHK_VECTOR(CNT, ...) \
         {\
-            VectorQSort arr{__VA_ARGS__};\
+            VectorQSort<int> arr{__VA_ARGS__};\
             CHK_ONE(arr.size(), CNT, "count of elements", #__VA_ARGS__);\
             CHK_ONE(arr.get_stat_max_stage(), 0U, "clean 'deep' statistic", #__VA_ARGS__);\
             CHK_ONE(arr.get_stat_swap_count(), 0U, "clean 'swap' statistic", #__VA_ARGS__);\
@@ -72,10 +75,10 @@ BOOST_AUTO_TEST_CASE(Statistics)
 
     #define CHK_VECTOR(D1, D2, S1, S2, ...) \
     {\
-        VectorQSort arr1{__VA_ARGS__};\
+        VectorQSort<int> arr1{__VA_ARGS__};\
         for(size_t iter=0U; iter < arr1.size(); ++iter)\
         {\
-            test_VectorQSort arr{__VA_ARGS__};\
+            test_VectorQSort<int> arr{__VA_ARGS__};\
             arr.iteration = iter;\
             arr.sort();\
             CHK_ONE(arr.get_stat_max_stage(), D1, D2, "'deep' statistics", #__VA_ARGS__)\
@@ -97,6 +100,64 @@ BOOST_AUTO_TEST_CASE(Statistics)
     CHK_VECTOR(1, 3, 1, 1, "-100 -100 100 100 0")
 
     #undef CHK_VECTOR
+    #undef CHK_ONE
+}
+
+BOOST_AUTO_TEST_CASE(Strings)
+{
+    test_VectorQSort<std::string> arr;
+    std::string_view str="zz za zf sd aaaa aaaa";
+
+    arr.set_string(str);
+    BOOST_CHECK_MESSAGE(arr.size() == 6U, "Failed array size (current "+std::to_string(arr.size())+" but need 6)");
+    ++unit_tests::counter_checks;
+
+    arr.sort();
+    BOOST_CHECK_MESSAGE(arr.get_stat_swap_count() == 4U, "Failed 'swap' statistics (current "+std::to_string(arr.get_stat_swap_count())+" but need 4)");
+    ++unit_tests::counter_checks;
+
+    #define CHK_ONE(IDX, RIGHT) \
+        BOOST_CHECK_MESSAGE(arr[IDX]==RIGHT,\
+                            "Failed sorted element[" #IDX "] (current '"+arr[IDX]+"' need '" RIGHT "'); Array is '"+std::string{str}+"'");\
+        ++unit_tests::counter_checks;
+
+    CHK_ONE(0, "aaaa")
+    CHK_ONE(1, "aaaa")
+    CHK_ONE(2, "sd")
+    CHK_ONE(3, "za")
+    CHK_ONE(4, "zf")
+    CHK_ONE(5, "zz")
+
+    #undef CHK_ONE
+}
+
+BOOST_AUTO_TEST_CASE(Floating)
+{
+    test_VectorQSort<float> arr;
+    std::string_view str="2.0 1.0000005 1.0000004 1.0000003 1.0000002 1.0000001";
+
+    arr.set_string(str);
+    BOOST_CHECK_MESSAGE(arr.size() == 6U, "Failed array size (current "+std::to_string(arr.size())+" but need 6)");
+    ++unit_tests::counter_checks;
+
+    //std::cout << std::fixed << std::setprecision(20) << "Before: " << arr << std::endl;
+    arr.sort();
+    //std::cout << std::fixed << std::setprecision(20) << "After: " << arr << std::endl;
+    BOOST_CHECK_MESSAGE(arr.get_stat_swap_count() == 1U, "Failed 'swap' statistics (current "+std::to_string(arr.get_stat_swap_count())+" but need 1)");
+    ++unit_tests::counter_checks;
+
+    #define CHK_ONE(IDX, RIGHT) \
+        BOOST_CHECK_MESSAGE(arr.eqv(IDX, RIGHT),\
+                            "Failed sorted element[" #IDX "] (current "+std::to_string(arr[IDX])+" need "+std::to_string(RIGHT)+"); Array is '"+std::string{str}+"'");\
+        ++unit_tests::counter_checks;
+
+    CHK_ONE(0, 1.0)
+    CHK_ONE(1, 1.0)
+    CHK_ONE(2, 1.0)
+    CHK_ONE(3, 1.0)
+    CHK_ONE(4, 1.0)
+    CHK_ONE(5, 2.0)
+
     #undef CHK_ONE
 }
 
