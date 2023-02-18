@@ -6,6 +6,8 @@
 #include <sstream>
 #include <syslog.h>
 #include <tuple>
+#include <optional>
+#include <vector>
 
 namespace xon
 {
@@ -16,6 +18,15 @@ using TimeInterval = std::chrono::duration<double>;
 using IntWorldIndex = long;
 using IntWorldPoint = std::tuple<IntWorldIndex, IntWorldIndex>;
 
+using WorldCoord = double;
+using WorldCoordOpt = std::optional<WorldCoord>;
+using IntWorldCoord = long;
+
+using Point = std::tuple<WorldCoord, WorldCoord>;
+using IntPoint = std::tuple<IntWorldCoord, IntWorldCoord>;
+
+using WorldCoordList =  std::vector<WorldCoord>;
+
 constexpr IntWorldIndex rows_minimal = 10;
 constexpr IntWorldIndex rows_maximal = 256;
 constexpr IntWorldIndex cols_minimal = 20;
@@ -24,6 +35,8 @@ constexpr IntWorldIndex cols_maximal = 256;
 constexpr IntWorldIndex minimal_border = 3;
 
 constexpr size_t default_enemy_count = 20U;
+
+constexpr WorldCoord default_enemy_diameter = 1.0;
 
 constexpr double default_player_speed = 10.0;
 
@@ -40,11 +53,12 @@ class Game;
 
 enum class CellValue: char
 {
-    empty,        ///< Sea
-    base,         ///< Land
-    property,     ///< Path
-    fill1,        ///< investigated stage 1
-    fill2,        ///< investigated stage 2
+    monolith, ///< Monolith (out of fieald ared)
+    sea,      ///< Sea area
+    land,     ///< Land ared
+    path,     ///< Path of player
+    fill1,    ///< Investigated stage 1
+    fill2,    ///< Investigated stage 2
 };
 
 /**
@@ -68,6 +82,17 @@ auto RandDbl() -> double;
 bool RandBool();
 
 
+auto normalizeAngle(const WorldCoord curr_angle) -> WorldCoord;
+
+auto round(const WorldCoord val) -> IntWorldCoord;
+
+auto round(const Point& val) -> IntPoint;
+
+auto round(const Item& val) -> IntPoint;
+
+auto operator<<(std::ostream& sream, const WorldCoordList& lst) -> std::ostream&;
+
+auto arithmeticMean(const WorldCoordList& lst) -> WorldCoord;
 
 } // namespace xon
 

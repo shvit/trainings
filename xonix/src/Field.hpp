@@ -38,15 +38,15 @@ public:
     auto getColsDbl() const -> double;
     auto getBorderDbl() const -> double;
 
-    auto get_world_row_begin() const -> size_t;
-    auto get_world_row_end() const -> size_t;
-    auto get_world_col_begin() const -> size_t;
-    auto get_world_col_end() const -> size_t;
+    auto get_world_row_begin() const -> IntWorldCoord;
+    auto get_world_row_end() const -> IntWorldCoord;
+    auto get_world_col_begin() const -> IntWorldCoord;
+    auto get_world_col_end() const -> IntWorldCoord;
 
-    auto get_sea_row_begin() const -> size_t;
-    auto get_sea_row_end() const -> size_t;
-    auto get_sea_col_begin() const -> size_t;
-    auto get_sea_col_end() const -> size_t;
+    auto get_sea_row_begin() const -> IntWorldCoord;
+    auto get_sea_row_end() const -> IntWorldCoord;
+    auto get_sea_col_begin() const -> IntWorldCoord;
+    auto get_sea_col_end() const -> IntWorldCoord;
 
     auto getWorldRowBegin() const -> double;
     auto getWorldRowEnd() const -> double;
@@ -59,7 +59,7 @@ public:
     auto getSeaColEnd() const -> double;
 
 
-    auto get_char(size_t, size_t) const -> CellValue;
+    auto getChar(const IntWorldCoord, const IntWorldCoord) const -> CellValue;
 
     auto operator=(const Field& src) -> Field&;
 
@@ -69,6 +69,10 @@ public:
     bool isInsideLand(const double curr_row, const double curr_col) const;
 
     bool isOnBorder(const double curr_row, const double curr_col) const;
+
+    bool isInsideSea(const Item& val) const;
+
+    auto getCollisionNormale(const Item& val, bool ref_sea = false, bool ref_land = false) const -> WorldCoordList;
 
 };
 

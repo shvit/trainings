@@ -80,9 +80,9 @@ bool Render::draw(const GameplayFrame& frame)
         for(size_t col = 0U; col < screen_cols_; ++col)
         {
             char out_ch = ' ';
-            switch(frame.getField().get_char(row, col))
+            switch(frame.getField().getChar(row, col))
             {
-                case xon::CellValue::base:
+                case xon::CellValue::land:
                     out_ch = '.';
                     break;
                 default:
@@ -96,11 +96,11 @@ bool Render::draw(const GameplayFrame& frame)
     // Render enemies
     for(auto en = frame.enemiesCbegin(); en != frame.enemiesCend(); en++)
     {
-        mvprintw((int)std::round(en->row), (int)std::round(en->col), "%c", '@');
+        mvprintw((int)std::round(en->getRow()), (int)std::round(en->getCol()), "%c", '@');
     }
 
     // Render player
-        mvprintw((int)std::round(frame.getPlayer().row), (int)std::round(frame.getPlayer().col), "%c", '$');
+        mvprintw((int)std::round(frame.getPlayer().getRow()), (int)std::round(frame.getPlayer().getCol()), "%c", '$');
 
     refresh();
 

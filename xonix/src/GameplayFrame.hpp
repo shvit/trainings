@@ -46,10 +46,10 @@ public:
     void initItemInBorder(Item& item, bool need_run = true);
     void initPlayer();
 
-    void checkCollisions();
 
 public:
     GameplayFrame();
+    GameplayFrame(const GameplayFrame& src);
 
     bool init(const size_t rows, const size_t cols);
 
@@ -63,7 +63,9 @@ public:
 
     auto operator=(const GameplayFrame& src) -> GameplayFrame&;
 
-    void moveStep(TimeStamp new_time);
+    bool moveStep(TimeStamp new_time);
+
+    void moveReflections(const GameplayFrame& backup);
 
 };
 

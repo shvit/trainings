@@ -1,7 +1,9 @@
 #include <cassert>
 #include <cmath>
+#include <vector>
 
 #include "Field.hpp"
+#include "Item.hpp"
 
 namespace xon
 {
@@ -73,31 +75,41 @@ auto Field::getBorderDbl() const -> double
     return (double)border_;
 }
 
-auto Field::get_char(size_t row, size_t col) const -> CellValue
+auto Field::getChar(const IntWorldCoord row, const IntWorldCoord col) const -> CellValue
 {
-    return field_[row][col];
+    if((row < get_world_row_begin()) ||
+       (row > get_world_row_end()) ||
+       (col < get_world_col_begin()) ||
+       (col > get_world_col_end()))
+    {
+        return CellValue::monolith;
+    }
+    else
+    {
+        return field_[row][col];
+    }
 }
 
 void Field::init()
 {
     std::fill(&field_[0U][0U], 
               &field_[0U][0U] + rows_maximal*cols_maximal,
-              CellValue::empty);
+              CellValue::sea);
 
     if(is_valid())
     {
         // Make borders
         for(size_t row = 0U; row < border_; ++row)
         {
-            std::fill(&field_[row][0U], &field_[row][cols_], CellValue::base);
+            std::fill(&field_[row][0U], &field_[row][cols_], CellValue::land);
 
             size_t row_down = rows_ - row - 1U;
-            std::fill(&field_[row_down][0U], &field_[row_down][cols_], CellValue::base);
+            std::fill(&field_[row_down][0U], &field_[row_down][cols_], CellValue::land);
         }
         for(size_t row = border_; row <= (rows_ - border_); ++row)
         {
-            std::fill(&field_[row][0U], &field_[row][border_], CellValue::base);
-            std::fill(&field_[row][cols_ - border_], &field_[row][cols_], CellValue::base);
+            std::fill(&field_[row][0U], &field_[row][border_], CellValue::land);
+            std::fill(&field_[row][cols_ - border_], &field_[row][cols_], CellValue::land);
         }
     }
               
@@ -125,14 +137,14 @@ bool Field::isInsideSea(const double curr_row, const double curr_col) const
 {
     auto [int_row, int_col] = normalizeIntPoint(curr_row, curr_col);
 
-    return field_[int_row][int_col] != CellValue::base;
+    return field_[int_row][int_col] != CellValue::land;
 }
 
 bool Field::isInsideLand(const double curr_row, const double curr_col) const
 {
     auto [int_row, int_col] = normalizeIntPoint(curr_row, curr_col);
 
-    return field_[int_row][int_col] != CellValue::empty;
+    return field_[int_row][int_col] != CellValue::sea;
 }
 
 bool Field::isOnBorder(const double curr_row, const double curr_col) const
@@ -140,46 +152,51 @@ bool Field::isOnBorder(const double curr_row, const double curr_col) const
     return isInsideWorld(curr_row, curr_col) && !isInsideSea(curr_row, curr_col);
 }
 
+bool Field::isInsideSea(const Item& val) const
+{
+    return isInsideSea(val.getRow(), val.getCol());
+}
+
 //--------------------------------------------------------------------------------------
 
-auto Field::get_world_row_begin() const -> size_t
+auto Field::get_world_row_begin() const -> IntWorldCoord
 {
     return 0U;
 }
-auto Field::get_world_row_end() const -> size_t
+auto Field::get_world_row_end() const -> IntWorldCoord
 {
     assert(rows_ > 0U);
     return rows_ - 1U;
 }
-auto Field::get_world_col_begin() const -> size_t
+auto Field::get_world_col_begin() const -> IntWorldCoord
 {
     return 0U;
 }
-auto Field::get_world_col_end() const -> size_t
+auto Field::get_world_col_end() const -> IntWorldCoord
 {
     assert(cols_ > 0U);
     return cols_ - 1U;
 }
 
-auto Field::get_sea_row_begin() const -> size_t
+auto Field::get_sea_row_begin() const -> IntWorldCoord
 {
     assert(rows_ > border_);
     return get_world_row_begin() + border_;
 }
 
-auto Field::get_sea_row_end() const -> size_t
+auto Field::get_sea_row_end() const -> IntWorldCoord
 {
     assert((rows_ > 0U) && (rows_ > border_));
     return rows_ - border_ - 1U;
 }
 
-auto Field::get_sea_col_begin() const -> size_t
+auto Field::get_sea_col_begin() const -> IntWorldCoord
 {
     assert(cols_ > border_);
     return get_world_col_begin() + border_;
 }
 
-auto Field::get_sea_col_end() const -> size_t
+auto Field::get_sea_col_end() const -> IntWorldCoord
 {
     assert((cols_ > 0U) && (cols_ > border_));
     return cols_ - border_ - 1U;
@@ -235,6 +252,48 @@ auto Field::normalizeIntPoint(const double curr_row, const double curr_col) cons
     if(IntWorldIndex tmp_val = get_world_col_end();   int_col > tmp_val) int_col = tmp_val;
 
     return {int_row, int_col};
+}
+
+auto Field::getCollisionNormale(const Item& item, bool ref_sea, bool ref_land) const -> WorldCoordList
+{
+    //WorldCoordOpt ret;
+
+    auto [row, col] = round(item);
+    auto diam = round(item.getDiameter() + 0.49);
+    std::vector<WorldCoord> collised_angles;
+
+    for(IntWorldCoord d = 0; d <= diam; ++d)
+    {
+        for(IntWorldCoord r = row - d; r <= row + d; ++r)
+        {
+            for(IntWorldCoord c = col - d; c <= col + d; ++c)
+            {
+                if((getChar(r, c) == CellValue::monolith) ||
+                   (ref_sea  && (getChar(r, c) == CellValue::sea)) ||
+                   (ref_land && (getChar(r, c) == CellValue::land)))
+                {
+                    WorldCoord d_row = (WorldCoord)r - item.getRow();
+                    WorldCoord d_col = (WorldCoord)c - item.getCol();
+                    WorldCoord alphaRad = std::atan2(d_row, d_col);
+                    WorldCoord chk_row = item.getRow() + (item.getDiameter() / 2) * sin(alphaRad);
+                    WorldCoord chk_col = item.getCol() + (item.getDiameter() / 2) * cos(alphaRad);
+                    if((((WorldCoord)r - chk_row) < 0.5) && 
+                       (((WorldCoord)c - chk_col) < 0.5))
+                    { // collision
+                        collised_angles.emplace_back(180.0 * alphaRad / M_PI);
+                    }
+                }
+            }
+        }
+
+        if(collised_angles.size()) // no more
+        {
+            DEBUG("Collised angles [d=" << d << "] for item " << item << ": " << collised_angles)
+            break; 
+        }
+    }
+
+    return collised_angles;
 }
 
 

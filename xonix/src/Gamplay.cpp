@@ -59,10 +59,15 @@ void Gameplay::playerStop()
 
 void Gameplay::moveStep()
 {
-    auto & frame = frameForPrepare();
-    frame.moveStep(std::chrono::system_clock::now());
+    auto & calc_frame = frameForPrepare();
+    auto backup_frame{calc_frame};
+
+    if(calc_frame.moveStep(std::chrono::system_clock::now()))
+    {
+        calc_frame.moveReflections(backup_frame);
+        switch_frames();
+    }
    
-    switch_frames();
 
 }
 
