@@ -2,6 +2,7 @@ APP := xonix
 
 DIR_BIN=bin
 DIR_SRC=src
+DIR_TST=$(DIR_SRC)/tests
 
 CFLAGS += -Wall -pedantic -fPIC -std=c++17 -MMD -MP
 LDFLAGS += -lstdc++ -lncurses
@@ -27,14 +28,16 @@ $(APP_FILE): $(OBJ_APP)
 -include $(DEPS)
 
 clean:
-	@rm -rf $(DIR_BIN)
-	@#$(MAKE) -C tests/ clean --no-print-directory 
+	@rm -rf $(DIR_BIN)/
+	@$(MAKE) -C $(DIR_TST)/ clean --no-print-directory 
 
 check: $(APP)
-	@#$(MAKE) -C tests/ check --no-print-directory 
+	@$(MAKE) -C $(DIR_TST)/ check --no-print-directory 
 
 show:
 	@echo "OBJ_APP: $(OBJ_APP)"
 	@echo "DEPS: $(DEPS)"
+	@echo "$(DIR_TST):"
+	@$(MAKE) -C $(DIR_TST)/ show --no-print-directory 
 
 .PHONY: show clean all check bin_dir

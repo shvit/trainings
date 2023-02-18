@@ -81,13 +81,13 @@ auto RandDbl() -> double;
  */
 bool RandBool();
 
-
 auto normalizeAngle(const WorldCoord curr_angle) -> WorldCoord;
 
 auto round(const WorldCoord val) -> IntWorldCoord;
 
 auto round(const Point& val) -> IntPoint;
 
+// TODO: move to Item.*
 auto round(const Item& val) -> IntPoint;
 
 auto operator<<(std::ostream& sream, const WorldCoordList& lst) -> std::ostream&;

@@ -51,6 +51,7 @@ auto Item::operator=(const Item& src) noexcept -> Item&
     return *this;
 }
 
+/*
 double Item::mirrorVertical(const double curr_ang) const
 {
     double new_ang = 360.0 - curr_ang;
@@ -62,16 +63,16 @@ double Item::mirrorHorizontal(const double curr_ang) const
     double new_ang = 180.0 - curr_ang;
     return normalizeAngle(new_ang);
 }
+*/
+//double Item::normalizeAngle(const double curr_ang) const
+//{
+//    double ret = curr_ang;
+//
+//    if(ret > 360.0) ret -= 360.0;
+//    if(ret < 0.0) ret += 360.0;
 
-double Item::normalizeAngle(const double curr_ang) const
-{
-    double ret = curr_ang;
-
-    if(ret > 360.0) ret -= 360.0;
-    if(ret < 0.0) ret += 360.0;
-
-    return ret;
-}
+//    return ret;
+//}
 
 /*
 void Item::move(TimeInterval ti, const Field& fld, bool is_bot)

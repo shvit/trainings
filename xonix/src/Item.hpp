@@ -26,9 +26,9 @@ protected:
     WorldCoord speed_;
     WorldCoord angle_;
 
-    double mirrorVertical(const double curr_ang) const;
-    double mirrorHorizontal(const double curr_ang) const;
-    double normalizeAngle(const double curr_ang) const;
+    //double mirrorVertical(const double curr_ang) const;
+    //double mirrorHorizontal(const double curr_ang) const;
+    //double normalizeAngle(const double curr_ang) const;
 
 public:
 
