@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+APP=bin/xonix
+
+if [ ! -f "$APP" ]; then
+    make -j12
+fi
+
+if [ -f "$APP" ]; then
+    $APP
+else
+    echo "No executable file found ($APP)"
+    exit 1
+fi
